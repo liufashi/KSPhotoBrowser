@@ -101,6 +101,10 @@ static NSString * const kAvatarUrl = @"https://tvax2.sinaimg.cn/crop.0.0.750.750
     NSLog(@"long pressed image:%@", image);
 }
 
+-(void)ks_photoBrowserClickShare{
+    NSLog(@"传出分享事件");
+}
+
 // MARK: - CollectionViewDataSource
 
 -(NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {

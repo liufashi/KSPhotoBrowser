@@ -16,6 +16,7 @@ static const NSTimeInterval kAnimationDuration = 0.33;
 static const NSTimeInterval kSpringAnimationDuration = 0.5;
 static const CGFloat kPageControlHeight = 20;
 static const CGFloat kPageControlBottomSpacing = 40;
+static const CGFloat kBottomBGSpacing = 130;
 static Class ImageManagerClass = nil;
 static Class ImageViewClass = nil;
 
@@ -28,7 +29,10 @@ static Class ImageViewClass = nil;
 @property (nonatomic, strong) UIImageView *backgroundView;
 @property (nonatomic, strong) UIPageControl *pageControl;
 @property (nonatomic, strong) UILabel *pageLabel;
+@property (nonatomic, strong) UIView *bottomBgView;
 @property (nonatomic, strong) UILabel *contentLable;
+@property (nonatomic, strong) UIButton *downLoadButton;
+@property (nonatomic, strong) UIButton *shareButton;
 @property (nonatomic, assign) BOOL presented;
 @property (nonatomic, assign) CGPoint startLocation;
 @property (nonatomic, assign) CGRect startFrame;
@@ -111,13 +115,27 @@ static Class ImageViewClass = nil;
         [self.view addSubview:_pageLabel];
     }
     
+    _bottomBgView = [[UIView alloc] init];
+    _bottomBgView.backgroundColor = [UIColor colorWithRed:0/255.0 green:0/255.0 blue:0/255.0 alpha:0.3];
+    [self.view addSubview:_bottomBgView];
+    
     _contentLable = [[UILabel alloc] init];
     _contentLable.textColor = [UIColor whiteColor];
-    _contentLable.font = [UIFont systemFontOfSize:16];
+    _contentLable.font = [UIFont systemFontOfSize:14];
     _contentLable.textAlignment = NSTextAlignmentCenter;
     _contentLable.numberOfLines = 2;
     _contentLable.text = @"这边显示两行这边显示两行这边显示两行这边显示两行这边显示两行这边显示两行这边显示两行这边显示两行这边显示两行这边显示两行这边显示两行这边显示两行这边显示两行这边显示两行";
-    [self.view addSubview:_contentLable];
+    [_bottomBgView addSubview:_contentLable];
+    
+    _shareButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [_shareButton setTitle:@"分享" forState:UIControlStateNormal];
+    [_shareButton addTarget:self action:@selector(shareImageClick) forControlEvents:UIControlEventTouchUpInside];
+    [_bottomBgView addSubview:_shareButton];
+    
+    _downLoadButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [_downLoadButton setTitle:@"下载" forState:UIControlStateNormal];
+    [_downLoadButton addTarget:self action:@selector(downLoadImageToPhoto) forControlEvents:UIControlEventTouchUpInside];
+    [_bottomBgView addSubview:_downLoadButton];
     
     [self setupFrames];
     
@@ -231,6 +249,38 @@ static Class ImageViewClass = nil;
     return [ImageManagerClass imageForURL:item.imageUrl];
 }
 
+- (void)downLoadImageToPhoto{
+    
+    UIImageWriteToSavedPhotosAlbum(self.backgroundView.image, self, @selector(image:didFinishSavingWithError:contextInfo:), NULL);
+}
+// 指定回调方法
+- (void)image: (UIImage *) image didFinishSavingWithError: (NSError *) error contextInfo: (void*) contextInfo{
+    
+    NSString *msg = nil ;
+    if(error != NULL){
+        msg = @"保存图片失败" ;
+    }else{
+        msg = @"保存图片成功";
+    }
+    
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"保存图片结果提示" message:msg
+                                                   delegate:self
+                                          cancelButtonTitle:@"确定"
+                                          otherButtonTitles:nil];
+    [alert show];
+}
+
+/**
+ 传出分享事件
+ */
+-(void)shareImageClick{
+    if (_delegate && [_delegate respondsToSelector:@selector(ks_photoBrowserClickShare)]) {
+        [_delegate ks_photoBrowserClickShare];
+    }
+}
+
+
+
 // MARK: - Private
 
 - (void)setupFrames {
@@ -240,13 +290,23 @@ static Class ImageViewClass = nil;
     rect.origin.x -= kKSPhotoViewPadding;
     rect.size.width += 2 * kKSPhotoViewPadding;
     _scrollView.frame = rect;
-    
+
     CGRect pageRect = CGRectMake(0, self.view.bounds.size.height - kPageControlBottomSpacing, self.view.bounds.size.width, kPageControlHeight);
     _pageControl.frame = pageRect;
     _pageLabel.frame = pageRect;
     
-    CGRect contentRect = CGRectMake(0, self.view.bounds.size.height - kPageControlBottomSpacing * 2, self.view.bounds.size.width, kPageControlHeight * 2);
+    //这边是添加蒙版
+    CGRect bottomBgViewRect = CGRectMake(0, self.view.bounds.size.height - kBottomBGSpacing, self.view.bounds.size.width, kBottomBGSpacing);
+    _bottomBgView.frame = bottomBgViewRect;
+    
+    CGRect contentRect = CGRectMake(16, 14, self.view.bounds.size.width - 32, 43);
     _contentLable.frame = contentRect;
+    
+    CGRect shareRect = CGRectMake(self.view.bounds.size.width - 20 - 50, 67, 50, 50);
+    _shareButton.frame = shareRect;
+    
+    CGRect downLoadRect = CGRectMake(self.view.bounds.size.width - 20 - 50 - 20 - 50, 67, 50, 50);
+    _downLoadButton.frame = downLoadRect;
     
     for (KSPhotoView *photoView in _visibleItemViews) {
         CGRect rect = _scrollView.bounds;
