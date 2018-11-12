@@ -28,6 +28,7 @@ static Class ImageViewClass = nil;
 @property (nonatomic, strong) UIImageView *backgroundView;
 @property (nonatomic, strong) UIPageControl *pageControl;
 @property (nonatomic, strong) UILabel *pageLabel;
+@property (nonatomic, strong) UILabel *contentLable;
 @property (nonatomic, assign) BOOL presented;
 @property (nonatomic, assign) CGPoint startLocation;
 @property (nonatomic, assign) CGRect startFrame;
@@ -109,6 +110,14 @@ static Class ImageViewClass = nil;
         [self configPageLabelWithPage:_currentPage];
         [self.view addSubview:_pageLabel];
     }
+    
+    _contentLable = [[UILabel alloc] init];
+    _contentLable.textColor = [UIColor whiteColor];
+    _contentLable.font = [UIFont systemFontOfSize:16];
+    _contentLable.textAlignment = NSTextAlignmentCenter;
+    _contentLable.numberOfLines = 2;
+    _contentLable.text = @"这边显示两行这边显示两行这边显示两行这边显示两行这边显示两行这边显示两行这边显示两行这边显示两行这边显示两行这边显示两行这边显示两行这边显示两行这边显示两行这边显示两行";
+    [self.view addSubview:_contentLable];
     
     [self setupFrames];
     
@@ -235,6 +244,9 @@ static Class ImageViewClass = nil;
     CGRect pageRect = CGRectMake(0, self.view.bounds.size.height - kPageControlBottomSpacing, self.view.bounds.size.width, kPageControlHeight);
     _pageControl.frame = pageRect;
     _pageLabel.frame = pageRect;
+    
+    CGRect contentRect = CGRectMake(0, self.view.bounds.size.height - kPageControlBottomSpacing * 2, self.view.bounds.size.width, kPageControlHeight * 2);
+    _contentLable.frame = contentRect;
     
     for (KSPhotoView *photoView in _visibleItemViews) {
         CGRect rect = _scrollView.bounds;
